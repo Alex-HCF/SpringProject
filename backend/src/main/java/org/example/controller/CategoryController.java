@@ -1,7 +1,7 @@
 package org.example.controller;
 
 import com.github.dozermapper.core.Mapper;
-import org.example.data.dto.CategoryDto;
+import org.example.data.dto.CategoryInDto;
 import org.example.data.entity.Category;
 import org.example.service.CategoryService;
 import org.springframework.http.HttpStatus;
@@ -44,8 +44,8 @@ public class CategoryController {
 
     @PreAuthorize("hasAnyAuthority('ROLE_ADMIN')")
     @PostMapping
-    ResponseEntity<?> addCategory(@RequestBody CategoryDto categoryDto){
-        Category category = dozerMapper.map(categoryDto, Category.class);
+    ResponseEntity<?> addCategory(@RequestBody CategoryInDto categoryInDto){
+        Category category = dozerMapper.map(categoryInDto, Category.class);
 
         var res = categoryService.addCategory(category);
 

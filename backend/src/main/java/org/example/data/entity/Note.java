@@ -18,6 +18,7 @@ public class Note {
 
     @ManyToOne
     @NotNull
+    @JoinColumn(name = "owner_id")
     private Person owner;
 
     private String headline;
@@ -26,11 +27,21 @@ public class Note {
 
     private String describe;
 
-    @ManyToOne
+    @OneToOne(cascade=CascadeType.ALL)
+    @JoinColumn(name = "location_id")
     private Location location;
 
     @ManyToOne
+    @JoinColumn(name = "category_id")
     private Category category;
 
-    private Date date;
+    @Column(name ="create_date")
+    private Date createDate;
+
+    @Column(name = "status")
+    @Enumerated(EnumType.STRING)
+    NoteStatus noteStatus;
+
+    @Column(name = "close_date")
+    private Date closeDate;
 }

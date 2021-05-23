@@ -21,6 +21,7 @@ public class ExceptionHandlerController {
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<?> handleOtherException(Exception exception){
+        System.out.println(exception.getMessage());
         return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
     }
 
