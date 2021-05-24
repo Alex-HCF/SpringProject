@@ -1,5 +1,6 @@
 package org.example.controller;
 
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import org.example.data.dto.NoteInDto;
 import org.example.data.dto.NoteOutDto;
 import org.example.data.dto.SearchDto;
@@ -38,8 +39,9 @@ public class NoteController {
 
 
 
-    @PreAuthorize("hasAnyAuthority('ROLE_USER', 'ROLE_ADMIN')")
     @PostMapping
+    @SecurityRequirement(name = "bearer-key")
+    @PreAuthorize("hasAnyAuthority('ROLE_USER', 'ROLE_ADMIN')")
     ResponseEntity<?> addNote(@RequestBody NoteInDto noteInDto){
         Note note = noteInMapper.NoteDtoToNote(noteInDto);
         note = noteService.addNote(note);
@@ -47,10 +49,8 @@ public class NoteController {
         return new ResponseEntity<>(noteOutDto, HttpStatus.OK);
     }
 
-    @PreAuthorize("hasAnyAuthority('ROLE_USER', 'ROLE_ADMIN')")
     @GetMapping("search")
     ResponseEntity<?> findNotes(@RequestBody SearchDto searchDto){
-
         List<Note> noteRes = noteService.findBySearchQuery(searchDto);
         noteRes = noteService.relevant(searchDto, noteRes);
         List<NoteOutDto> noteOutDto = noteRes.stream().map(noteOutMapper::noteToNoteOutDto)

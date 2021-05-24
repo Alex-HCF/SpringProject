@@ -1,5 +1,6 @@
 package org.example.data.mapper;
 
+import org.example.data.dto.PersonCreatedDto;
 import org.example.data.dto.PersonInfoDto;
 import org.example.data.entity.Person;
 import org.example.service.PersonService;
@@ -9,8 +10,8 @@ import org.mapstruct.Mapping;
 import org.mapstruct.Named;
 import org.springframework.beans.factory.annotation.Autowired;
 
-@Mapper
-public abstract class PersonInfoMapper {
+@Mapper(componentModel = "spring")
+public abstract class PersonMapper {
     @Autowired
     private PersonService personService;
 
@@ -21,6 +22,7 @@ public abstract class PersonInfoMapper {
     @Mapping(source = "status", target = "status")
     @Mapping(source = "id", target = "countNotes", qualifiedByName = "getCountNotes")
     @Mapping(source = "id", target = "countOpenNotes", qualifiedByName = "getCountOpenNotes")
+    @Mapping(source = "id", target = "countMessages", qualifiedByName = "getCountOpenNotes")
     public abstract PersonInfoDto personToPersonInfoDto(Person person);
 
     @Named("getCountNotes")
@@ -32,7 +34,18 @@ public abstract class PersonInfoMapper {
         return personService.countOpenNotesForPersonId(id);
     }
 
-//    @AfterMapping
-//    private void setAdditionalFeilds(@)
+    @Named("getCountMessages")
+    Integer getCountMessages(Long id){
+        return personService.countMessages(id);
+    }
+
+    @Mapping(source = "id", target = "personId")
+    @Mapping(source = "login", target = "login")
+    @Mapping(source = "name", target = "name")
+    @Mapping(source = "surname", target = "surname")
+    @Mapping(source = "status", target = "status")
+    @Mapping(source = "role", target = "role")
+    public abstract PersonCreatedDto personToPersonCreatedDto(Person person);
+
 
 }

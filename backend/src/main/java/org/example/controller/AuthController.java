@@ -1,12 +1,11 @@
 package org.example.controller;
 
-import com.github.dozermapper.core.Mapper;
 import com.sun.istack.NotNull;
 import org.example.data.dto.LoginDto;
+import org.example.data.dto.PersonCreatedDto;
 import org.example.data.dto.RegistrationDto;
-import org.example.data.entity.Role;
-import org.example.data.entity.Status;
 import org.example.data.entity.Person;
+import org.example.data.mapper.PersonMapper;
 import org.example.security.JwtProvider;
 import org.example.service.PersonService;
 import org.springframework.http.HttpStatus;
@@ -23,39 +22,25 @@ import java.util.Optional;
 @RequestMapping("/api/v1/auth")
 public class AuthController {
 
-    final PersonService personService;
-    final Mapper dozerMapper;
-    final PasswordEncoder passwordEncoder;
-    final JwtProvider jwtProvider;
+    private final PersonService personService;
+    private final PasswordEncoder passwordEncoder;
+    private final JwtProvider jwtProvider;
+    private final PersonMapper personMapper;
 
-    public AuthController(PersonService personService, Mapper dozerMapper, PasswordEncoder passwordEncoder, JwtProvider jwtProvider) {
+    public AuthController(PersonService personService, PasswordEncoder passwordEncoder, JwtProvider jwtProvider, PersonMapper personMapper) {
         this.personService = personService;
-        this.dozerMapper = dozerMapper;
         this.passwordEncoder = passwordEncoder;
         this.jwtProvider = jwtProvider;
+        this.personMapper = personMapper;
     }
 
     @PostMapping("/signup")
     public ResponseEntity<?> signup( @NotNull @RequestBody RegistrationDto registrationDto){
 
-        Optional<Person> checkingUser = personService.findByLogin(registrationDto.getLogin());
+        Person createdPerson = personService.create(registrationDto);
+        PersonCreatedDto personCreatedDto = personMapper.personToPersonCreatedDto(createdPerson);
 
-        if(checkingUser.isPresent()){
-            return new ResponseEntity<>(String.format("Login %s already exists", registrationDto.getLogin()), HttpStatus.CONFLICT);
-        }
-
-        Person person = Person.builder()
-                .login(registrationDto.getLogin())
-                .password(passwordEncoder.encode(registrationDto.getPassword()))
-                .name(registrationDto.getName())
-                .surname(registrationDto.getSurname())
-                .role(Role.ROLE_USER)
-                .status(Status.ACTIVE)
-                .build();
-
-        personService.save(person);
-
-        return new ResponseEntity<>(HttpStatus.CREATED);
+        return new ResponseEntity<>(personCreatedDto, HttpStatus.CREATED);
     }
 
     @PostMapping("/login")

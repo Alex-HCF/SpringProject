@@ -5,7 +5,7 @@ import org.example.data.entity.Note;
 import org.example.data.entity.Person;
 import org.mapstruct.*;
 
-@Mapper(componentModel = "spring", uses = {LocationOutMapper.class, CategoryOutMapper.class})
+@Mapper(componentModel = "spring", uses = {LocationMapper.class, CategoryMapper.class})
 public abstract class NoteOutMapper {
 
     @Mapping(source = "id", target = "id")

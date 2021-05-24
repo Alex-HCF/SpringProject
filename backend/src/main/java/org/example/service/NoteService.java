@@ -5,7 +5,7 @@ import org.example.data.dto.SearchDto;
 import org.example.data.entity.Category;
 import org.example.data.entity.Note;
 import org.example.data.entity.NoteStatus;
-import org.example.data.mapper.LocationInMapper;
+import org.example.data.mapper.LocationMapper;
 import org.example.exception.EntityNotFound;
 import org.example.repository.NoteRepository;
 import org.example.utils.LocationUtils;
@@ -26,14 +26,14 @@ public class NoteService {
     private final DaDataGeoTool geoTool;
     private final LocationUtils locationUtils;
     private final CategoryService categoryService;
-    private final LocationInMapper locationInMapper;
+    private final LocationMapper locationMapper;
 
-    public NoteService(NoteRepository noteRepository, DaDataGeoTool geoTool, LocationUtils locationUtils, CategoryService categoryService, LocationInMapper locationInMapper) {
+    public NoteService(NoteRepository noteRepository, DaDataGeoTool geoTool, LocationUtils locationUtils, CategoryService categoryService, LocationMapper locationMapper) {
         this.noteRepository = noteRepository;
         this.geoTool = geoTool;
         this.locationUtils = locationUtils;
         this.categoryService = categoryService;
-        this.locationInMapper = locationInMapper;
+        this.locationMapper = locationMapper;
     }
 
     public Note addNote(Note note){
@@ -75,11 +75,11 @@ public class NoteService {
 
         GeoData geoData = geoTool.getGeoDataFromAddress(searchDto.getAddress());
         var fiasWithType = locationUtils.
-                findTheMostAccurateFias(locationInMapper.geoDataToLocation(geoData));
+                findTheMostAccurateFias(locationMapper.geoDataToLocation(geoData));
         var type = fiasWithType.getFiasType();
         var fias = fiasWithType.getFiasId();
 
-        List<Note> res = new ArrayList<>();
+        List<Note> res;
 
         switch (type){
             case HOUSE -> res = noteRepository.findByPriceAndCategoryAndHouse(1., 2., Arrays.asList(1L, 2L), UUID.fromString("b756fe6b-bbd3-44d5-9302-5bfcc740f46e"));
@@ -89,7 +89,7 @@ public class NoteService {
             case AREA -> res = noteRepository.findByPriceAndCategoryAndArea(minPrice, maxPrice, categoriesId,fias);
             case REGION -> res = noteRepository.findByPriceAndCategoryAndRegion(minPrice, maxPrice, categoriesId,fias);
             default -> throw new IllegalStateException("Unexpected value: " + type);
-        };
+        }
 
         return res;
     }
@@ -102,7 +102,7 @@ public class NoteService {
 
             @Override
             public Double apply(List<String> strings) {
-                final Double COEFF_SIM = 0.95;
+                final double COEFF_SIM = 0.95;
 
                 int countAcceptWords = 0;
                 for(var keyWord : inKeywords){

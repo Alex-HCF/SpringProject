@@ -5,8 +5,8 @@ public class EntityAlreadyExists extends IllegalArgumentException {
         super();
     }
 
-    public EntityAlreadyExists(Class<?> name, Long id) {
-        super("Entity " + name.getSimpleName() + " with id " + id + " already exists");
+    public EntityAlreadyExists(Class<?> name, Object id) {
+        super("Entity " + name.getSimpleName() + " with identificator " + id + " already exists");
     }
 
 }

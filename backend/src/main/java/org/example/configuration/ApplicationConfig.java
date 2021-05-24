@@ -1,7 +1,8 @@
 package org.example.configuration;
 
-import com.github.dozermapper.core.DozerBeanMapperBuilder;
-import com.github.dozermapper.core.Mapper;
+import io.swagger.v3.oas.models.Components;
+import io.swagger.v3.oas.models.OpenAPI;
+import io.swagger.v3.oas.models.security.SecurityScheme;
 import org.example.utils.geoTools.DaDataGeoTool;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -13,12 +14,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 public class ApplicationConfig {
 
     @Bean
-    public Mapper dozerBeanMapper(){
-        return DozerBeanMapperBuilder.buildDefault();
-    }
-
-
-    @Bean
     public PasswordEncoder passwordEncoder(){
         return new BCryptPasswordEncoder();
     }
@@ -26,6 +21,13 @@ public class ApplicationConfig {
     @Bean
     public DaDataGeoTool geoTool(@Value("${dadataAuthorization}") String auth, @Value("${dadataXSecret}") String xSecret){
         return new DaDataGeoTool(auth, xSecret);
+    }
+
+    @Bean
+    public OpenAPI customOpenAPI() {
+        return new OpenAPI()
+                .components(new Components()
+                        .addSecuritySchemes("bearer-key", new SecurityScheme().type(SecurityScheme.Type.HTTP).scheme("bearer").bearerFormat("JWT")));
     }
 
 }

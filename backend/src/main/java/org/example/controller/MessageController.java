@@ -1,5 +1,6 @@
 package org.example.controller;
 
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import org.example.utils.PersonUtils;
 import org.example.data.dto.MessageInDto;
 import org.example.data.dto.MessageOutDto;
@@ -9,6 +10,7 @@ import org.example.data.mapper.MessageOutMapper;
 import org.example.service.MessageService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -31,6 +33,8 @@ public class MessageController {
     }
 
     @PostMapping("send")
+    @SecurityRequirement(name = "bearer-key")
+    @PreAuthorize("hasAnyAuthority('ROLE_USER', 'ROLE_ADMIN')")
     ResponseEntity<?> sendMessage(@RequestBody MessageInDto messageInDto){
         Message message = messageMapper.MessageDtoToMessage(messageInDto);
         message = messageService.save(message);
@@ -39,6 +43,8 @@ public class MessageController {
     }
 
     @GetMapping
+    @SecurityRequirement(name = "bearer-key")
+    @PreAuthorize("hasAnyAuthority('ROLE_USER', 'ROLE_ADMIN')")
     ResponseEntity<?> getMessagesByNote(@RequestParam(name = "noteId") Long noteId){
         Long currentUserId = personUtils.getCurrentPerson().getId();
         List<Message> messages = messageService.findByPersonAndNote(currentUserId, noteId);

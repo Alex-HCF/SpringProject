@@ -2,8 +2,10 @@ package org.example.repository;
 
 import org.example.data.entity.Category;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 
+import javax.transaction.Transactional;
 import java.util.List;
 import java.util.Optional;
 
@@ -39,6 +41,8 @@ public interface CategoryRepository extends JpaRepository<Category, Long> {
     boolean existsByParentIdAndName(Long parentId, String name);
 
 
+    @Transactional
+    @Modifying(clearAutomatically = true)
     @Query(value =
             "WITH RECURSIVE r AS(" +
             "SELECT id, parent_id, 1 AS level from category " +
@@ -49,6 +53,7 @@ public interface CategoryRepository extends JpaRepository<Category, Long> {
             "DELETE FROM category " +
             "WHERE id IN (SELECT id FROM r)" , nativeQuery = true)
     void deleteRecursive(Long id);
+
 
 
 }

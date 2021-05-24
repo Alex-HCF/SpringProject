@@ -44,19 +44,21 @@ public class CategoryService {
         if(!categoryRepository.existsById(id)){
             throw new EntityNotFound(Category.class, id);
         }
-
         categoryRepository.deleteRecursive(id);
     }
 
     public Category findById(Long id){
         var res = categoryRepository.findById(id);
-        if(res.isPresent()){
-            return res.get();
-        } else {
-            throw new EntityNotFound(Category.class, id);
-        }
+        return res.orElseThrow(() -> new EntityNotFound(Category.class, id));
     }
 
+    public void deleteById(Long id){
+        Category category = findById(id);
+        List<Category> childsCategory = findCategoriesWithParentId(id);
+        childsCategory.forEach((child) -> child.setParentId(category.getParentId()));
+        categoryRepository.saveAll(childsCategory);
+        categoryRepository.deleteById(id);
+    }
 
     public boolean existsById(Long id) {
         return categoryRepository.existsById(id);

@@ -10,7 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Date;
 
-@Mapper(componentModel = "spring", uses = LocationInMapper.class)
+@Mapper(componentModel = "spring", uses = LocationMapper.class)
 public abstract class NoteInMapper {
 
     @Autowired
