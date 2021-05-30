@@ -9,6 +9,7 @@ import java.util.UUID;
 @NoArgsConstructor
 public class LocationOutDto {
     private UUID fiasId;
+    private String address;
     private Double longitude;
     private Double latitude;
 }

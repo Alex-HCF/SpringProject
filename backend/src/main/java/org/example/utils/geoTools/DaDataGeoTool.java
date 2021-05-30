@@ -5,10 +5,13 @@ import org.example.exception.BadEntityException;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
+import java.util.UUID;
+
 public class DaDataGeoTool {
 
     private static final String DEFAULT_COORD_FROM_ADDRESS_URL = "https://cleaner.dadata.ru/api/v1/clean/address";
     private static final String DEFAULT_ADDRESS_FROM_COORD_URL = "https://suggestions.dadata.ru/suggestions/api/4_1/rs/geolocate/address";
+    private static final String DEFAULT_ADDRESS_FROM_FIAS_URL = "https://suggestions.dadata.ru/suggestions/api/4_1/rs/findById/address";
 
     private final WebClient webClient;
 
@@ -44,11 +47,26 @@ public class DaDataGeoTool {
         JsonObject jsonObject = JsonParser.parseString(jsonInString).getAsJsonObject();
         JsonObject data =  jsonObject
                 .get("suggestions")
-                .getAsJsonArray().get(0)
-                .getAsJsonObject().get("data")
-                .getAsJsonObject();
+                .getAsJsonArray().get(0).getAsJsonObject();
 
-        return new GeoDataImpl(data);
+        return new GeoDataImpl2(data);
+
+    }
+
+    public GeoData getGeoDataFromFias(UUID fias){
+        String body = "{ \"query\": \"" + fias + "\" }";
+        var jsonInString =  webClient.post().uri(DEFAULT_ADDRESS_FROM_FIAS_URL).body(Mono.just(body), String.class).retrieve().bodyToMono(String.class).block();
+
+        if(jsonInString == null){
+            throw new BadEntityException(fias + " is not found");
+        }
+
+        JsonObject jsonObject = JsonParser.parseString(jsonInString).getAsJsonObject();
+        JsonObject data =  jsonObject
+                .get("suggestions")
+                .getAsJsonArray().get(0).getAsJsonObject();
+
+        return new GeoDataImpl2(data);
 
     }
 

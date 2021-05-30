@@ -43,7 +43,7 @@ public abstract class MessageInMapper {
         if(id == null) {
             throw new EntityNotFound(Person.class, id);
         }
-        return personService.findById(id).orElseThrow(() -> new EntityNotFound(Person.class, id));
+        return personService.findById(id);
     }
 
     @AfterMapping

@@ -4,6 +4,7 @@ import com.sun.istack.NotNull;
 import lombok.Data;
 
 import javax.persistence.*;
+import javax.validation.constraints.NotBlank;
 import java.time.LocalDate;
 import java.util.Date;
 
@@ -21,10 +22,13 @@ public class Note {
     @JoinColumn(name = "owner_id")
     private Person owner;
 
+    @NotBlank
     private String headline;
 
+    @NotNull
     private Double price;
 
+    @NotBlank
     private String describe;
 
     @OneToOne(cascade=CascadeType.ALL)

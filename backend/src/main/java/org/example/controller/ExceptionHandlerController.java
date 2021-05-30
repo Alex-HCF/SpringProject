@@ -8,6 +8,8 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
+import java.util.Arrays;
+
 @ControllerAdvice
 public class ExceptionHandlerController {
 
@@ -28,6 +30,8 @@ public class ExceptionHandlerController {
     @ExceptionHandler(Exception.class)
     public ResponseEntity<?> handleOtherException(Exception exception){
         System.out.println(exception.getMessage());
+        System.out.println(Arrays.toString(exception.getStackTrace()));
+
         return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
     }
 

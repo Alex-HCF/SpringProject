@@ -22,4 +22,6 @@ public interface GeoData {
     Double getLongitude();
     Double getLatitude();
 
+    String getAddress();
+
 }

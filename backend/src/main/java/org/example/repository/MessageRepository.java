@@ -17,4 +17,9 @@ public interface MessageRepository extends JpaRepository<Message, Long> {
             "order by m.date", nativeQuery = true)
     List<Message> findMessagesByPersonAndNote(@Param("person_id") Long personId, @Param("note_id") Long noteId);
 
+    @Query(value = "" +
+            "select * from message " +
+            "where (sender_id = :id1 or sender_id = :id2 ) and (recipient_id = :id1 or recipient_id = :id2)", nativeQuery = true)
+    List<Message> findMessageByTwoPerson(@Param("id1") Long id1, @Param("id2") Long id2);
+
 }

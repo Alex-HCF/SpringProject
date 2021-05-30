@@ -1,6 +1,7 @@
 package org.example.controller;
 
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import org.example.data.entity.Person;
 import org.example.utils.PersonUtils;
 import org.example.data.dto.MessageInDto;
 import org.example.data.dto.MessageOutDto;
@@ -42,10 +43,10 @@ public class MessageController {
         return new ResponseEntity<>(messageOutDto, HttpStatus.OK);
     }
 
-    @GetMapping
+    @GetMapping("findByNote")
     @SecurityRequirement(name = "bearer-key")
     @PreAuthorize("hasAnyAuthority('ROLE_USER', 'ROLE_ADMIN')")
-    ResponseEntity<?> getMessagesByNote(@RequestParam(name = "noteId") Long noteId){
+    ResponseEntity<?> getLastMessagesByNote(@RequestParam(name = "noteId") Long noteId){
         Long currentUserId = personUtils.getCurrentPerson().getId();
         List<Message> messages = messageService.findByPersonAndNote(currentUserId, noteId);
         List<MessageOutDto> messagesOutDto = messages.stream()
@@ -53,9 +54,16 @@ public class MessageController {
                 .collect(Collectors.toList());
         return new ResponseEntity<>(messagesOutDto, HttpStatus.OK);
     }
-//    @GetMapping
-//    ResponseEntity<?> getMessagesByPerson(@RequestParam(name = "personId") Long personId){
-//        return null;
-//    }
+
+
+    @GetMapping("findByPerson")
+    @SecurityRequirement(name = "bearer-key")
+    @PreAuthorize("hasAnyAuthority('ROLE_USER', 'ROLE_ADMIN')")
+    ResponseEntity<?> getMessagesByPerson(@RequestParam(name = "personId") Long personId){
+        Person currentPerson = personUtils.getCurrentPerson();
+        List<Message> messages = messageService.findMessagesByTwoPerson(personId, currentPerson.getId());
+        List<MessageOutDto> messageOutDtos = messages.stream().map(messageOutMapper::messageToMessageOutDto).collect(Collectors.toList());
+        return new ResponseEntity<>(messageOutDtos, HttpStatus.OK);
+    }
 
 }

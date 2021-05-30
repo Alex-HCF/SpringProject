@@ -17,6 +17,6 @@ public class PersonUtils {
 
     public Person getCurrentPerson(){
         UserDetails principal = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        return personService.findByUserDetails(principal).get();
+        return personService.findByUserDetails(principal);
     }
 }

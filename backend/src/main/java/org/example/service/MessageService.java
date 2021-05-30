@@ -33,4 +33,8 @@ public class MessageService {
 //    public List<Message> findHeadMessagesByPerson(Long personId){
 //        return messageRepository.findMessagesByPersonAndNote(personId, noteId);
 //    }
+
+    public List<Message> findMessagesByTwoPerson(Long id1, Long id2){
+        return messageRepository.findMessageByTwoPerson(id1, id2);
+    }
 }

@@ -5,6 +5,7 @@ import org.example.data.dto.LoginDto;
 import org.example.data.dto.PersonCreatedDto;
 import org.example.data.dto.RegistrationDto;
 import org.example.data.entity.Person;
+import org.example.data.entity.Status;
 import org.example.data.mapper.PersonMapper;
 import org.example.security.JwtProvider;
 import org.example.service.PersonService;
@@ -27,7 +28,8 @@ public class AuthController {
     private final JwtProvider jwtProvider;
     private final PersonMapper personMapper;
 
-    public AuthController(PersonService personService, PasswordEncoder passwordEncoder, JwtProvider jwtProvider, PersonMapper personMapper) {
+    public AuthController(PersonService personService, PasswordEncoder passwordEncoder,
+                          JwtProvider jwtProvider, PersonMapper personMapper) {
         this.personService = personService;
         this.passwordEncoder = passwordEncoder;
         this.jwtProvider = jwtProvider;
@@ -49,7 +51,9 @@ public class AuthController {
         Optional<Person> user = personService.findByLoginAndPassword(loginDto.getLogin(), loginDto.getPassword());
 
         if(user.isEmpty()){
-            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+            return new ResponseEntity<>("Bad credentials", HttpStatus.UNAUTHORIZED);
+        } else if (!user.get().getStatus().equals(Status.ACTIVE)){
+            return new ResponseEntity<>("Account is disabled", HttpStatus.UNAUTHORIZED);
         }
 
         return new ResponseEntity<>(jwtProvider.generateToken(user.get().getLogin(), user.get().getRole()), HttpStatus.OK);

@@ -28,7 +28,8 @@ public abstract class LocationMapper {
 
     public LocationOutDto locationToLocationOutDto(Location location){
         UUID fiasId = locationUtils.findTheMostAccurateFias(location).getFiasId();
-        return new LocationOutDto(fiasId, location.getLongitude(), location.getLatitude());
+        String address = daDataGeoTool.getGeoDataFromFias(fiasId).getAddress();
+        return new LocationOutDto(fiasId, address, location.getLongitude(), location.getLatitude());
     }
 
     public abstract Location geoDataToLocation(GeoData geoData);

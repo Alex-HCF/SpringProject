@@ -1,6 +1,11 @@
 package org.example.controller;
 
+import io.swagger.v3.oas.annotations.OpenAPIDefinition;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.headers.Header;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.example.data.dto.NoteInDto;
 import org.example.data.dto.NoteOutDto;
 import org.example.data.dto.SearchDto;
@@ -10,6 +15,7 @@ import org.example.data.mapper.NoteOutMapper;
 import org.example.service.NoteService;
 import org.example.service.PersonService;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -23,20 +29,18 @@ import java.util.stream.Collectors;
 public class NoteController {
 
     private final NoteService noteService;
-
     private final PersonService personService;
-
     private final NoteInMapper noteInMapper;
     private final NoteOutMapper noteOutMapper;
 
 
-    public NoteController(NoteService noteService, PersonService personService, NoteInMapper noteInMapper, NoteOutMapper noteOutMapper) {
+    public NoteController(NoteService noteService, PersonService personService,
+                          NoteInMapper noteInMapper, NoteOutMapper noteOutMapper) {
         this.noteService = noteService;
         this.personService = personService;
         this.noteInMapper = noteInMapper;
         this.noteOutMapper = noteOutMapper;
     }
-
 
 
     @PostMapping
@@ -49,7 +53,8 @@ public class NoteController {
         return new ResponseEntity<>(noteOutDto, HttpStatus.OK);
     }
 
-    @GetMapping("search")
+
+    @PostMapping(value = "search")
     ResponseEntity<?> findNotes(@RequestBody SearchDto searchDto){
         List<Note> noteRes = noteService.findBySearchQuery(searchDto);
         noteRes = noteService.relevant(searchDto, noteRes);
@@ -59,7 +64,11 @@ public class NoteController {
         return new ResponseEntity<>(noteOutDto, HttpStatus.OK);
     }
 
-
-
-
+    @DeleteMapping("{id}")
+    @SecurityRequirement(name = "bearer-key")
+    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN')")
+    ResponseEntity<?> deleteNote(@PathVariable("id") Long id){
+        noteService.deleteNote(id);
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
 }

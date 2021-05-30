@@ -4,7 +4,12 @@ VALUES ('Personal items'),
        ('Transport');
 
 INSERT INTO category (name, parent_id)
-VALUES ('Clothes', 1),
+VALUES ('Personal items', null),
+       ('Realty', null),
+       ('Transport', null),
+       ('Electronics', null),
+       ('Telephones', 4),
+       ('Clothes', 1),
        ('Man clothes', 4),
        ('Shoes', 5),
        ('Shirts', 5),

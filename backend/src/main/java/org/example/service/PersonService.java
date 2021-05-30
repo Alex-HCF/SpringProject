@@ -2,6 +2,7 @@ package org.example.service;
 
 import org.example.data.dto.PersonInfoDto;
 import org.example.data.dto.RegistrationDto;
+import org.example.data.dto.UpdatePersonDto;
 import org.example.data.entity.Person;
 import org.example.data.entity.Role;
 import org.example.data.entity.Status;
@@ -13,7 +14,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import javax.persistence.EntityNotFoundException;
 import java.util.List;
 import java.util.Optional;
 
@@ -29,7 +32,7 @@ public class PersonService {
     }
 
     public Person create(RegistrationDto registrationDto){
-        Optional<Person> checkingUser = findByLogin(registrationDto.getLogin());
+        Optional<Person> checkingUser = personRepository.findByLogin(registrationDto.getLogin());
 
         if(checkingUser.isPresent()){
             throw new EntityAlreadyExists(Person.class, registrationDto);
@@ -51,12 +54,12 @@ public class PersonService {
         return personRepository.save(person);
     }
 
-    public Optional<Person> findById(Long id) {
-        return personRepository.findById(id);
+    public Person findById(Long id) {
+        return personRepository.findById(id).orElseThrow(()-> new EntityNotFound(Person.class, id));
     }
 
-    public Optional<Person> findByLogin(String login) {
-        return personRepository.findByLogin(login);
+    public Person findByLogin(String login) {
+        return personRepository.findByLogin(login).orElseThrow(()-> new EntityNotFound(Person.class, login));
     }
 
     public void deleteById(Long id) {
@@ -78,7 +81,7 @@ public class PersonService {
         return Optional.empty();
     }
 
-    public Optional<Person> findByUserDetails(UserDetails userDetails) {
+    public Person findByUserDetails(UserDetails userDetails) {
         String login = userDetails.getUsername();
         return findByLogin(login);
     }
@@ -102,5 +105,37 @@ public class PersonService {
 
     public List<Person> findPersonsByIdRange(Long startId, Long endId) {
         return personRepository.findPersonsByRange(startId, endId);
+    }
+
+    @Transactional
+    public Person disable(Long id) {
+        Person person = personRepository.findById(id).orElseThrow(()-> new EntityNotFound(Person.class, id));
+        person.setStatus(Status.DISABLED);
+        return personRepository.save(person);
+    }
+    @Transactional
+    public Person ban(Long id) {
+        Person person = personRepository.findById(id).orElseThrow(()-> new EntityNotFound(Person.class, id));
+        person.setStatus(Status.BANNED);
+        return personRepository.save(person);
+    }
+    @Transactional
+    public Person activate(Long id) {
+        Person person = personRepository.findById(id).orElseThrow(()-> new EntityNotFound(Person.class, id));
+        person.setStatus(Status.ACTIVE);
+        return personRepository.save(person);
+    }
+
+    public Person update(Long id, UpdatePersonDto updatePersonDto) {
+        Person person = findById(id);
+
+        if(updatePersonDto.getLogin() != null)    person.setLogin(updatePersonDto.getLogin());
+        if(updatePersonDto.getPassword() != null) person.setPassword(passwordEncoder.encode(updatePersonDto.getPassword()));
+        if(updatePersonDto.getName() != null)     person.setName(updatePersonDto.getName());
+        if(updatePersonDto.getName() != null)     person.setSurname(updatePersonDto.getSurname());
+        if(updatePersonDto.getStatus() != null)   person.setStatus(updatePersonDto.getStatus());
+        if(updatePersonDto.getRole() != null)     person.setRole(updatePersonDto.getRole());
+
+        return personRepository.save(person);
     }
 }

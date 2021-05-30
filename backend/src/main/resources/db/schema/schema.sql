@@ -65,6 +65,7 @@ CREATE TABLE IF NOT EXISTS message
 
 );
 
+
 -- CREATE TABLE IF NOT EXISTS note_status
 --  (
 --      id serial primary key ,

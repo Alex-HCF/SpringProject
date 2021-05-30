@@ -77,12 +77,12 @@ public class NoteService {
         var fiasWithType = locationUtils.
                 findTheMostAccurateFias(locationMapper.geoDataToLocation(geoData));
         var type = fiasWithType.getFiasType();
-        var fias = fiasWithType.getFiasId();
+        UUID fias = fiasWithType.getFiasId();
 
         List<Note> res;
 
         switch (type){
-            case HOUSE -> res = noteRepository.findByPriceAndCategoryAndHouse(1., 2., Arrays.asList(1L, 2L), UUID.fromString("b756fe6b-bbd3-44d5-9302-5bfcc740f46e"));
+            case HOUSE -> res = noteRepository.findByPriceAndCategoryAndHouse(minPrice, maxPrice, categoriesId, fias);
             case STREET -> res = noteRepository.findByPriceAndCategoryAndStreet(minPrice, maxPrice, categoriesId,fias);
             case CITY -> res = noteRepository.findByPriceAndCategoryAndCity(minPrice, maxPrice, categoriesId,fias);
             case SETTLEMENT -> res = noteRepository.findByPriceAndCategoryAndSettlement(minPrice, maxPrice, categoriesId,fias);
@@ -96,31 +96,36 @@ public class NoteService {
 
     public List<Note> relevant(SearchDto searchDto, List<Note> notes){
         notes = new ArrayList<>(notes);
-        List<String> inKeywords = List.of(searchDto.getSearchQuery().split(" "));
-        var f = new Function<List<String>, Double>() {
-            JaroWinkler similarity = new JaroWinkler();
+        List<String> inKeywords = List.of(searchDto.getSearchQuery().toLowerCase().split(" "));
+
+        var relevance_assessment = new Function<List<String>, Double>() {
+            final JaroWinkler similarity = new JaroWinkler();
 
             @Override
             public Double apply(List<String> strings) {
-                final double COEFF_SIM = 0.95;
+                final double COEFF_SIM = 0.75;
 
-                int countAcceptWords = 0;
+                double sumRelValue = 0;
                 for(var keyWord : inKeywords){
-                    if(strings.stream().anyMatch((o) -> similarity.similarity(keyWord, o) > COEFF_SIM)){
-                        countAcceptWords++;
+                    var wordWithMaxRelValue = strings.stream().max((w1, w2) -> similarity.similarity(keyWord, w1) < similarity.similarity(keyWord, w2) ? -1 : 1);
+;                    if(wordWithMaxRelValue.isPresent()){
+                        double relValue = similarity.similarity(keyWord, wordWithMaxRelValue.get());
+                        if(relValue >= COEFF_SIM) {
+                            sumRelValue += relValue;
+                        }
                     }
                 }
-                return ((double)countAcceptWords)/inKeywords.size();
+                return sumRelValue/inKeywords.size();
             }
         };
 
         notes.sort((o1, o2) -> {
-            List<String> agr1 = new ArrayList<>(List.of(o1.getHeadline().split(" ")));
-            agr1.addAll(List.of(o1.getDescribe().split(" ")));
-            List<String> agr2 = new ArrayList<>(List.of(o2.getHeadline().split(" ")));
-            agr2.addAll(List.of(o2.getDescribe().split(" ")));
+            List<String> agr1 = new ArrayList<>(List.of(o1.getHeadline().toLowerCase().split(" ")));
+            agr1.addAll(List.of(o1.getDescribe().toLowerCase().split(" ")));
+            List<String> agr2 = new ArrayList<>(List.of(o2.getHeadline().toLowerCase().split(" ")));
+            agr2.addAll(List.of(o2.getDescribe().toLowerCase().split(" ")));
 
-            return f.apply(agr1) < f.apply(agr2) ? 1 : -1;
+            return relevance_assessment.apply(agr1) < relevance_assessment.apply(agr2) ? 1 : -1;
         });
 
         return notes;
